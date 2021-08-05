@@ -1,0 +1,15 @@
+#BlueJ class context
+comment0.target=RSA
+comment1.params=x
+comment1.target=int\ number_of_digits_in(java.math.BigInteger)
+comment2.params=a\ b
+comment2.target=java.math.BigInteger\ gcd(java.math.BigInteger,\ java.math.BigInteger)
+comment3.params=p
+comment3.target=java.math.BigInteger\ totient(java.math.BigInteger[])
+comment4.params=data\ key\ n
+comment4.target=java.math.BigInteger\ encrypt(java.math.BigInteger,\ java.math.BigInteger,\ java.math.BigInteger)
+comment5.params=p\ lower_limit\ upper_limit
+comment5.target=java.math.BigInteger[]\ get_key_pair(java.math.BigInteger[],\ java.math.BigInteger,\ java.math.BigInteger)
+comment6.params=
+comment6.target=void\ main()
+numComments=7
