@@ -25,7 +25,9 @@ II) USE
 1) Use get_encrypted_file() and get_decrypted_file() to encrypt and decrypt a file. The filename argument should not contain the extension. The extension argument should not contain the "." prefix.
 2) Run the main() method in class File_encryption to generate an encrypted .txt file containing the text input. The exit code can be changed by changing the exit_code state variable in the source code of class File_encryption.
 
-Warning: the encryption process is quite slow, which I plan to improve in upcoming versions
+Warning: 
+1) The encryption process is quite slow, which I plan to improve in upcoming versions
+2) Do not skip SETUP and use the provided key pair. The sk has been included as a comment for testing purposes and is publically available.
 
 License:
 GPL
