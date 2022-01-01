@@ -1,9 +1,9 @@
 # RSA-encryption
 An implementation of the simplest form of RSA encryption.
 
-Author: Mathew K J
-Version: 2.0
-Date: 01-01-2022
+Author: Mathew K J  
+Version: 2.0  
+Date: 01-01-2022  
 
 Features:
 1) Handles all filetypes
