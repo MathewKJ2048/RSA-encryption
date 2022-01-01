@@ -1,22 +1,31 @@
 # RSA-encryption
 An implementation of the simplest form of RSA encryption.
 
-class RSA has all the functions necessary to generate a public key/private key pair given appropriate primes.
-RSA.test() generates a key pair with two primes and allows one to confirm that they work.
--1 indicates a failed attempt at finding a private key for a given public key.
-The message to be encrypted is a BigInteger 0<=m<n.
-Entry of -1 for m ends the execution of test().
+Author: Mathew K J
+Version: 2.0
+Date: 01-01-2022
 
-class File_encryption provides necessary tools for encrypting text files of arbitrary length and decrypting files encrypted by it.
-The keys used can be changed by initilializing appropriate values to state variables.
-Only ASCII characters are supported. characters are truncated at 8 bits/1 byte.
-main() does not encrypt sentence by sentence. It merely allows input to be sentence by sentence without the entire message shown on screen.
-the message broken into chunks and encrypted.
-"\n" is used as a delimiter to separate encrypted chunks.
-filenames generated using the Unix epoch, to ensure file creation does not cause errors.
-All files are created or accessed from working dircetory.
+Features:
+1) Handles all filetypes
+2) Autogenerates date and time of encryption and decryption
+3) Reads large files using a buffer
 
-The secret key to the given key has been listed as a comment for testing purposes.
-Those who intend to use my code are advised to generate a different key pair.
-https://bigprimes.org/ is helpful for getting primes.
+Requirements:
+java version 8.0 or higher
 
+Instructions for use:
+
+I) SETUP
+1) Obtain a pair of large prime numbers (https://bigprimes.org is quite useful). The two primes must around 50 digits long, with one longer than the other
+2) Run test() in class RSA and feed in the two prime numbers. n and φ(n) (the totient of n) are generated.
+3) Enter a public key such that it divides φ(n). 65537 (2^16 + 1) is recommended, though any factor of the totient can be used. A smaller public key results in faster encryption and a larger private key, which in turn results in more security.
+4) Enter the values thus obtained into the appropriate state variables in the source code of class File_encryption. This sets up the cryptosystem.
+
+II) USE
+1) Use get_encrypted_file() and get_decrypted_file() to encrypt and decrypt a file. The filename argument should not contain the extension. The extension argument should not contain the "." prefix.
+2) Run the main() method in class File_encryption to generate an encrypted .txt file containing the text input. The exit code can be changed by changing the exit_code state variable in the source code of class File_encryption.
+
+Warning: the encryption process is quite slow, which I plan to improve in upcoming versions
+
+License:
+GPL
