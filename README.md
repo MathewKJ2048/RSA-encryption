@@ -2,13 +2,14 @@
 An implementation of the simplest form of RSA encryption.
 
 Author: Mathew K J  
-Version: 2.0  
+Version: 2.1  
 Date: 01-01-2022  
 
 Features:
 1) Handles all filetypes
 2) Autogenerates date and time of encryption and decryption
 3) Reads large files using a buffer
+4) generates a slider using swing to show progress of reading/writing/encrypting files
 
 Requirements:
 java version 8.0 or higher
@@ -28,6 +29,7 @@ II) USE
 Warning: 
 1) The encryption process is quite slow, which I plan to improve in upcoming versions.
 2) Do not skip SETUP and use the provided key pair. The sk has been included as a comment for testing purposes and is publically available.
+3) The current version is not back-compatible with the previous version. The process(String) and process(BigInteger) methods of class File_encryption of the earlier version can be used in the current version to allow it to handle files encrypted using the previous version.
 
 License:
-GPL
+GPLv3
