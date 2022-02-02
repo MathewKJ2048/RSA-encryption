@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=Temp_tracker
+comment1.params=total\ title
+comment1.target=Temp_tracker(int,\ java.lang.String)
+comment2.params=current
+comment2.target=void\ update(int)
+comment3.params=
+comment3.target=void\ close()
+numComments=4
