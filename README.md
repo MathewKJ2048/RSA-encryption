@@ -3,7 +3,7 @@ An implementation of the simplest form of RSA encryption.
 
 Author: Mathew K J  
 Version: 2.1  
-Date: 01-01-2022  
+Date: 16-01-2022  
 
 Features:
 1) Handles all filetypes
@@ -14,6 +14,10 @@ Features:
 Requirements:
 java version 8.0 or higher
 
+Dependencies:
+java.awt
+javax.swing
+
 Instructions for use:
 
 I) SETUP
@@ -21,10 +25,12 @@ I) SETUP
 2) Run test() in class RSA and feed in the two prime numbers. n and φ(n) (the totient of n) are generated.
 3) Enter a public key such that it divides φ(n). 65537 (2^16 + 1) is recommended, though any factor of the totient can be used. A smaller public key results in faster encryption and a larger private key, which in turn results in more security.
 4) Enter the values thus obtained into the appropriate state variables in the source code of class File_encryption. This sets up the cryptosystem.
+5) Create a folder called program files with a .txt file named "default path.txt". Enter the path of the destination folder into this document.
 
 II) USE
-1) Use get_encrypted_file() and get_decrypted_file() to encrypt and decrypt a file. The filename argument should not contain the extension. The extension argument should not contain the "." prefix.
-2) Run the main() method in class File_encryption to generate an encrypted .txt file containing the text input. The exit code can be changed by changing the exit_code state variable in the source code of class File_encryption.
+
+2) Use get_encrypted_file() and get_decrypted_file() to encrypt and decrypt a file. The filename argument should not contain the extension. The extension argument should not contain the "." prefix.
+3) Run the main() method in class File_encryption to generate an encrypted .txt file containing the text input. The exit code can be changed by changing the exit_code state variable in the source code of class File_encryption.
 
 Warning: 
 1) The encryption process is quite slow, which I plan to improve in upcoming versions.
