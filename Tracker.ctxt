@@ -1,9 +1,0 @@
-#BlueJ class context
-comment0.target=Tracker
-comment1.params=total
-comment1.target=Tracker(int)
-comment2.params=
-comment2.target=int\ get_total()
-comment3.params=current
-comment3.target=void\ update(int)
-numComments=4
