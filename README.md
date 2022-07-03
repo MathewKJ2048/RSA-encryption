@@ -11,8 +11,8 @@ An application to encrypt messages using the RSA algorithm, written in java usin
 ## Credits
 
 - Algorithm - [Rivest](https://scholar.google.com/citations?user=6qE0tdAAAAAJ&hl=en), [Shamir](https://scholar.google.com/citations?user=EHLBP20AAAAJ&hl=en) and [Adleman](https://viterbi.usc.edu/directory/faculty/Adleman/Leonard)
-- Implementation - [Mathew K J]
-- GUI - [Mathew K J]
+- Implementation - [Mathew K J](https://github.com/MathewKJ2048)
+- GUI - [Mathew K J](https://github.com/MathewKJ2048)
 
 The following software was used in this project:
 
