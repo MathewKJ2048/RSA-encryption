@@ -12,7 +12,6 @@ public class ProgressWindow extends JFrame
     private File_encryptor e;
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         this.progressBar = new JProgressBar(0,1024);
         this.progressBar.setValue(1000);
     }

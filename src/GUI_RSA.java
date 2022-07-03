@@ -21,6 +21,9 @@ import org.json.simple.parser.JSONParser;
 
 public class GUI_RSA extends JFrame
 {
+    public static final Path TEST = Paths.get("program files/test.bin");
+    public static final Path TEST_ENCRYPTED = Paths.get("program files/test-encrypted.bin");
+    public static final Path TEST_DECRYPTED = Paths.get("program files/test-decrypted.bin");
     public static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     public static final String LAF_JSON_KEY = "Look and Feel";
     public static final String DEFAULT_DIRECTORY_SOURCE_PATH_JSON_KEY = "Default Source Directory Path";
@@ -96,6 +99,8 @@ public class GUI_RSA extends JFrame
             BigInteger pk_old = new BigInteger((String)obj.get(PK_JSON_KEY));
             BigInteger sk_old = new BigInteger((String)obj.get(SK_JSON_KEY));
             String key = "" + "\n----\nDate (saved) : " +
+                    "\n----\nDate: "+df.format(new Date())+
+                    "\nUnix Epoch: "+(System.currentTimeMillis()/1000)+
                     df.format(new Date()) +
                     "\nn: " + n_old +
                     "\npk: " + pk_old +
@@ -192,6 +197,8 @@ public class GUI_RSA extends JFrame
     }
     public void initialize()
     {
+
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         try
         {
             load_key();
@@ -226,7 +233,6 @@ public class GUI_RSA extends JFrame
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.pack();
         this.setVisible(true);
-        final JFileChooser fc = new JFileChooser();
         LFComboBox.addActionListener(e -> {
             look_and_feel = LFComboBox.getSelectedItem().toString();
             set_look_and_feel();
@@ -318,7 +324,9 @@ public class GUI_RSA extends JFrame
         saveButton.addActionListener(e -> {
             /*
             use the following format:
-            ---- Time:
+            ----
+            Date:
+            Unix Epoch:
             p:
             q:
             n:
@@ -326,8 +334,8 @@ public class GUI_RSA extends JFrame
             sk:
              */
             StringBuilder key = new StringBuilder();
-            key.append("\n----\nDate: ");
-            key.append(df.format(new Date()));
+            key.append("\n----\nDate: ").append(df.format(new Date()));
+            key.append("\nUnix Epoch: ").append(System.currentTimeMillis()/1000);
             key.append("\np: ").append(p.toString());
             key.append("\nq: ").append(q.toString());
             key.append("\nn: ").append(n.toString());
@@ -351,6 +359,9 @@ public class GUI_RSA extends JFrame
                 PK = pk;
                 SK = sk;
                 N = n;
+                PKtextField.setText(PK.toString());
+                SKtextField.setText(SK.toString());
+                NtextField.setText(N.toString());
                 set_key(pk,sk,n,saveKeysBeforeReplacementRadioButton.isSelected());
                 JOptionPane.showMessageDialog(keyPanel,"key updated in key.json","Info",JOptionPane.INFORMATION_MESSAGE);
             }
@@ -426,21 +437,116 @@ public class GUI_RSA extends JFrame
                 {
                     if(is_encryption)fe.encrypt();
                     else fe.decrypt();
-                }catch (Exception e){//TODO fill
+                }catch (Exception e)
+                {
+                    JOptionPane.showMessageDialog(mainPanel,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                 }
                 p.save_and_exit();
             }
         }
+        // file.ex becomes file (encrypted at EPOCH).ex and is stored in destination directory
         encryptButton.addActionListener(e -> {
-            File_encryptor fe = new File_encryptor(N,PK,(int)byte_limit,Paths.get("program files/test.bin"),Paths.get("program files/test-enc.bin"));
-            OperationThread et = new OperationThread(fe,true,"test");
-            et.start();
+            try
+            {
+                String name = chosen_file.getName();
+                int i = name.lastIndexOf('.');
+                String extension = "";
+                if(i!=-1)extension = name.substring(i);
+                name = name.substring(0,name.lastIndexOf('.'));
+                Path path = Paths.get(default_directory_destination.getAbsolutePath()+"/"+name+" (encrypted at EPOCH "+System.currentTimeMillis()/1000+")"+extension);
+                Files.writeString(path,"");
+                File_encryptor fe = new File_encryptor(N,PK,(int)byte_limit,Paths.get(chosen_file.getAbsolutePath()),path);
+                OperationThread et = new OperationThread(fe,true,"Encrypting "+chosen_file.getName());
+                et.start();
+                JOptionPane.showMessageDialog(mainPanel,name+extension+" has been encrypted and stored in "+path.toString(),"Info",JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch(Exception ex)
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(mainPanel,ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        decryptButton.addActionListener(e -> {
+            try
+            {
+                String name = chosen_file.getName();
+                int i = name.lastIndexOf('.');
+                String extension = "";
+                if(i!=-1)extension = name.substring(i);
+                name = name.substring(0,name.lastIndexOf('.'));
+                Path path = Paths.get(default_directory_destination.getAbsolutePath()+"/"+name+" (decrypted at EPOCH "+System.currentTimeMillis()/1000+")"+extension);
+                Files.writeString(path,"");
+                File_encryptor fe = new File_encryptor(N,SK,(int)byte_limit,Paths.get(chosen_file.getAbsolutePath()),path);
+                OperationThread et = new OperationThread(fe,false,"Decrypting "+chosen_file.getName());
+                et.start();
+                JOptionPane.showMessageDialog(mainPanel,name+extension+" has been decrypted and stored in "+path.toString(),"Info",JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch(Exception ex)
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(mainPanel,ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        loadFileButton.addActionListener(e -> {
+            JFileChooser filechooser = new JFileChooser();
+            filechooser.setCurrentDirectory(default_directory_source);
+            int rv = filechooser.showOpenDialog(GUI_RSA.this);
+            if(rv == JFileChooser.APPROVE_OPTION)
+            {
+                chosen_file = filechooser.getSelectedFile();
+                chosenFileNameTextField.setText(chosen_file.getAbsolutePath());
+                encryptButton.setEnabled(true);
+                decryptButton.setEnabled(true);
+            }
+        });
+        sourceDirectoryChangeButton.addActionListener(e -> {
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int rv = fc.showOpenDialog(GUI_RSA.this);
+            if(rv == JFileChooser.APPROVE_OPTION)
+            {
+                default_directory_source = fc.getSelectedFile();
+                sourceDirectoryTextField.setText(default_directory_source.getAbsolutePath());
+                fc.setCurrentDirectory(default_directory_source);
+            }
+        });
+        destinationDirectoryChangeButton.addActionListener(e -> {
+            int rv = fc.showOpenDialog(GUI_RSA.this);
+            if(rv == JFileChooser.APPROVE_OPTION)
+            {
+                default_directory_destination = fc.getSelectedFile();
+                destinationDirectoryTextField.setText(default_directory_destination.getAbsolutePath());
+            }
+        });
+        testButton.addActionListener(e -> {
+            try
+            {
+                Files.writeString(TEST_ENCRYPTED,"");
+                Files.writeString(TEST_DECRYPTED,"");
+                File_encryptor fee = new File_encryptor(n,pk,(int)byte_limit,TEST,TEST_ENCRYPTED);
+                fee.encrypt();
+                System.out.println("Encryption complete");
+                File_encryptor fed = new File_encryptor(n,sk,(int)byte_limit,TEST_ENCRYPTED,TEST_DECRYPTED);
+                fed.decrypt();
+                System.out.println("Decryption complete");
+                byte[] b0 = Files.readAllBytes(TEST);
+                byte[] b1 = Files.readAllBytes(TEST_DECRYPTED);
+                if(b0.length!=b1.length)throw new Exception("Error detected: length mismatch");
+                for(int i =0;i<b0.length;i++)if(b0[i]!=b1[i])throw new Exception("Error detected");
+                JOptionPane.showMessageDialog(mainPanel,"Test successful","Info",JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch(Exception ex)
+            {
+                JOptionPane.showMessageDialog(mainPanel,"Test failed","Error",JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            }
         });
     }
 
     private final JFrame main = this;
+    private final JFileChooser fc = new JFileChooser();
     private static File default_directory_source = new JFileChooser().getCurrentDirectory();
     private static File default_directory_destination = new JFileChooser().getCurrentDirectory();
+    private static File chosen_file = null;
     private static String look_and_feel = "Nimbus";
     private static Font ConsoleFont = new Font("Consolas",Font.PLAIN,16);
     public static Font get_console_font()
@@ -494,8 +600,8 @@ public class GUI_RSA extends JFrame
     private JButton SK_main_changeButton;
     private JButton N_main_changeButton;
     private JButton showButton;
-    private JTextField textField1;
-    private JButton loadButton;
+    private JTextField chosenFileNameTextField;
+    private JButton loadFileButton;
     private JButton encryptButton;
     private JButton decryptButton;
     private JComboBox memoryUnitComboBox;
