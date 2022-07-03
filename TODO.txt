@@ -1,1 +1,16 @@
+functions:
+change font size
+look into directory selection
+store preference of saving keys
 
+
+log section:
+textarea
+show/hide
+save
+delete
+
+info:
+Author
+License
+Libre et gratis
