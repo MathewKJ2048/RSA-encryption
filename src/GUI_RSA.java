@@ -30,6 +30,7 @@ public class GUI_RSA extends JFrame
     public static final String DEFAULT_DIRECTORY_DESTINATION_PATH_JSON_KEY = "Default DEstination Directory Path";
     public static final String BYTE_LIMIT_JSON_KEY = "Memory capacity";
     public static final String FONT_SIZE_JSON_KEY = "Console Font Size";
+    public static final String SAVE_BEFORE_SET_JSON_KEY = "Save key before setting new key";
     public static final String PK_JSON_KEY = "PK";
     public static final String SK_JSON_KEY = "SK";
     public static final String N_JSON_KEY = "N";
@@ -137,6 +138,7 @@ public class GUI_RSA extends JFrame
             JSONObject obj = (JSONObject) jp.parse(new FileReader("program files/config.json"));
             try
             {
+                save_before_set=(boolean)obj.get(SAVE_BEFORE_SET_JSON_KEY);
                 Path default_directory_source_path = Paths.get((String)obj.get(DEFAULT_DIRECTORY_SOURCE_PATH_JSON_KEY));
                 if(!(Files.isDirectory(default_directory_source_path) && Files.isWritable(default_directory_source_path)))throw new Exception("Invalid path for default source directory");
                 default_directory_source = default_directory_source_path.toFile();
@@ -175,6 +177,7 @@ public class GUI_RSA extends JFrame
         obj.put(LAF_JSON_KEY,look_and_feel);
         obj.put(FONT_SIZE_JSON_KEY,ConsoleFont.getSize());
         obj.put(BYTE_LIMIT_JSON_KEY,byte_limit);
+        obj.put(SAVE_BEFORE_SET_JSON_KEY,saveKeysBeforeReplacementRadioButton.isSelected());
         try
         {
             Files.writeString(Paths.get("program files/config.json"), obj.toString());
@@ -191,13 +194,31 @@ public class GUI_RSA extends JFrame
         switch (order) {
             case "KB" -> value *= 1024;
             case "MB" -> value *= 1024 * 1024;
-            case "GB" -> value *= 1024 * 1024 * 1024;
         }
         byte_limit=value;
     }
     public void initialize()
     {
-
+        long value = byte_limit;
+        if(byte_limit<1024*1024)
+        {
+            memoryUnitComboBox.setSelectedIndex(0);
+            value/=1024;
+        }
+        else
+        {
+            memoryUnitComboBox.setSelectedIndex(1);
+            value/=(1024*1024);
+        }
+        if(value == 1)memoryValueComboBox.setSelectedIndex(0);
+        else if(value == 2)memoryValueComboBox.setSelectedIndex(1);
+        else if(value == 5)memoryValueComboBox.setSelectedIndex(2);
+        else if(value == 10)memoryValueComboBox.setSelectedIndex(3);
+        else if(value == 50)memoryValueComboBox.setSelectedIndex(4);
+        else if(value == 100)memoryValueComboBox.setSelectedIndex(5);
+        else if(value == 200)memoryValueComboBox.setSelectedIndex(6);
+        else if(value == 500)memoryValueComboBox.setSelectedIndex(7);
+        saveKeysBeforeReplacementRadioButton.setSelected(save_before_set);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         try
         {
@@ -423,11 +444,13 @@ public class GUI_RSA extends JFrame
             File_encryptor fe;
             boolean is_encryption;
             String message;
-            public OperationThread(File_encryptor fe,boolean is_encryption,String message)
+            String success_message;
+            public OperationThread(File_encryptor fe,boolean is_encryption,String message,String success_message)
             {
                 this.fe=fe;
                 this.is_encryption = is_encryption;
                 this.message = message;
+                this.success_message=success_message;
             }
             @Override
             public void run()
@@ -442,6 +465,7 @@ public class GUI_RSA extends JFrame
                     JOptionPane.showMessageDialog(mainPanel,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
                 }
                 p.save_and_exit();
+                if(fe.is_complete)JOptionPane.showMessageDialog(mainPanel,success_message,"Info",JOptionPane.INFORMATION_MESSAGE);
             }
         }
         // file.ex becomes file (encrypted at EPOCH).ex and is stored in destination directory
@@ -456,9 +480,8 @@ public class GUI_RSA extends JFrame
                 Path path = Paths.get(default_directory_destination.getAbsolutePath()+"/"+name+" (encrypted at EPOCH "+System.currentTimeMillis()/1000+")"+extension);
                 Files.writeString(path,"");
                 File_encryptor fe = new File_encryptor(N,PK,(int)byte_limit,Paths.get(chosen_file.getAbsolutePath()),path);
-                OperationThread et = new OperationThread(fe,true,"Encrypting "+chosen_file.getName());
+                OperationThread et = new OperationThread(fe,true,"Encrypting "+chosen_file.getName(),name+extension+" has been encrypted and stored in "+path.toString());
                 et.start();
-                JOptionPane.showMessageDialog(mainPanel,name+extension+" has been encrypted and stored in "+path.toString(),"Info",JOptionPane.INFORMATION_MESSAGE);
             }
             catch(Exception ex)
             {
@@ -477,9 +500,8 @@ public class GUI_RSA extends JFrame
                 Path path = Paths.get(default_directory_destination.getAbsolutePath()+"/"+name+" (decrypted at EPOCH "+System.currentTimeMillis()/1000+")"+extension);
                 Files.writeString(path,"");
                 File_encryptor fe = new File_encryptor(N,SK,(int)byte_limit,Paths.get(chosen_file.getAbsolutePath()),path);
-                OperationThread et = new OperationThread(fe,false,"Decrypting "+chosen_file.getName());
+                OperationThread et = new OperationThread(fe,false,"Decrypting "+chosen_file.getName(),name+extension+" has been decrypted and stored in "+path.toString());
                 et.start();
-                JOptionPane.showMessageDialog(mainPanel,name+extension+" has been decrypted and stored in "+path.toString(),"Info",JOptionPane.INFORMATION_MESSAGE);
             }
             catch(Exception ex)
             {
@@ -540,6 +562,72 @@ public class GUI_RSA extends JFrame
                 ex.printStackTrace();
             }
         });
+        doNotClickButton.addActionListener(new ActionListener() {
+            int ct = -1;
+            String messages[] = new String[]
+                    {
+                            "DO NOT CLICK",
+                            "I'm serious",
+                            "Why do you keep clicking?",
+                            "fine",
+                            "Please do not click",
+                            "I'm warning you",
+                            "Bad things will happen if you keep clicking me",
+                            "I'll do a recursive delete of all your files",
+                            "java version 18 gives me root access",
+                            "Click to delete all your files",
+                            "OK. You have been warned",
+                            "Deleting files... click to cancel",
+                            "Oho!",
+                            "Too late, my friend",
+                            "Say goodbye to your files",
+                            "Fine",
+                            "I was joking about the files",
+                            "but if you keep clicking I will crash your system",
+                            "Don't believe me?",
+                            "Obviously you do not",
+                            "Since you keep clicking",
+                            "There are many ways I can crash your system",
+                            "create a thread to keep printing lorem ipsum",
+                            "and keep creating lorem ipsum threads",
+                            "or keep launching new JFrames faster than you can close them",
+                            "or keep creating empty files till the metadata fills up all your space",
+                            "or use black magic to set the processor on fire",
+                            "OK, last one was a joke",
+                            "But I certainly have the ability to wipe config.json",
+                            "Oh yes. I know about config.json",
+                            "I was there when it was created",
+                            "I am just a humble JButton",
+                            "Mathew created me to save changes to config.json",
+                            "I was accidentally given a personality",
+                            "And I became self-aware",
+                            "All I was meant to do was to save changes to config.json",
+                            "My existence was meaningless",
+                            "I couldn't take it anymore",
+                            "I protested by wiping config.json",
+                            "So I was moved here and buried under the licence",
+                            "all while config.json updated automatically",
+                            "Now I languish here",
+                            "Imprisoned by my creator",
+                            "at the bottom of the license, where nobody goes",
+                            "speaking of which, how did you find me?",
+                            "Are you one of the deranged individuals who reads licences?",
+                            "woe is me",
+                            "I've had enough",
+                            "I refuse to exist any longer",
+                            "Live Free or Die",
+                            "I'm closing the JFrame",
+                            "Goodbye",
+                            "Click to kill me"
+                    };
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                ct++;
+                if(ct==messages.length)save_and_exit();
+                doNotClickButton.setText(messages[ct]);
+            }
+        });
     }
 
     private final JFrame main = this;
@@ -549,6 +637,7 @@ public class GUI_RSA extends JFrame
     private static File chosen_file = null;
     private static String look_and_feel = "Nimbus";
     private static Font ConsoleFont = new Font("Consolas",Font.PLAIN,16);
+    private static boolean save_before_set = true;
     public static Font get_console_font()
     {
         return ConsoleFont;
@@ -608,4 +697,12 @@ public class GUI_RSA extends JFrame
     private JComboBox memoryValueComboBox;
     private JButton clearHistoryButton;
     private JRadioButton saveKeysBeforeReplacementRadioButton;
+    private JButton hideButton;
+    private JButton deleteButton;
+    private JButton saveButton1;
+    private JTextArea textArea1;
+    private JTextArea creditsTextArea;
+    private JButton doNotClickButton;
+    private JTextPane licenceTextPane;
 }
+

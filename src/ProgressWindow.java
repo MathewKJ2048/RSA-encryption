@@ -36,7 +36,6 @@ public class ProgressWindow extends JFrame
                 while(c.is_in_progress)
                 {
                     progressBar.setValue((int)(1024*e.get_bytes_processed()/e.get_total_bytes()));
-                    System.out.println(e.get_bytes_processed()/1024);
                     try
                     {
                         Thread.sleep(frame_rate);
@@ -53,10 +52,9 @@ public class ProgressWindow extends JFrame
     }
     public void save_and_exit()
     {
-        e.is_active = false;
+        e.deactivate();
         c.is_in_progress = false;
         this.dispose();
-        System.out.println("close");
     }
     public ProgressWindow(File_encryptor e,String Message)
     {
@@ -73,7 +71,6 @@ public class ProgressWindow extends JFrame
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.messageLabel.setText(Message);
         this.pack();
-        System.out.println("Constructor");
         abortButton.addActionListener(e1 -> {
             save_and_exit();
         });
