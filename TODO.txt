@@ -2,7 +2,6 @@ functions:
 change font size
 look into directory selection
 store preference of saving keys
-deal with case where process is aborted
 
 
 log section:
