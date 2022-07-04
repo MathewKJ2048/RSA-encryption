@@ -7,6 +7,12 @@ import java.io.*;
 
 public class File_encryptor
 {
+    /*
+    A unique File_encryptor object is made for each file
+    One object carries out only one process before deactiviating
+    the destination path and source path must be specified beforehand
+    the process can be terminated at any time by calling deactivate()
+     */
     private BigInteger n;   // n used to encrypt/decrypt
     private BigInteger key; // key used to encrypt/decrypt
     public int memory_capacity; //proportional to max RAM usage
@@ -21,7 +27,10 @@ public class File_encryptor
     {
         return total_bytes;
     }
-    public volatile boolean is_active = true;
+    private volatile boolean is_active = true;
+    public void deactivate(){is_active=false;}
+    public boolean is_complete(){return is_complete;}
+    public volatile boolean is_complete = false;
     private volatile Path p;
     private volatile Path d;
     public File_encryptor(BigInteger n, BigInteger key, int mc, Path p, Path d)
@@ -68,9 +77,14 @@ public class File_encryptor
             encrypted_numbers.add(enc.toString());
             
             Files.write(d,encrypted_numbers,StandardOpenOption.WRITE,StandardOpenOption.APPEND);
-            if(l<mc)break;
+            if(l<mc)
+            {
+                is_complete = true;
+                break;
+            }
             k++;
         }
+        if(!is_complete)Files.writeString(d,"");
         is_active = false;
     }
     public void decrypt() throws Exception
@@ -110,9 +124,14 @@ public class File_encryptor
             for(int i=0;i<data.size();i++)data_primitive[i] = data.get(i);
             data.clear();
             Files.write(d,data_primitive,StandardOpenOption.WRITE,StandardOpenOption.APPEND);
-            if(l<mc)break;
+            if(l<mc)
+            {
+                is_complete = true;
+                break;
+            }
             k++;
         }
+        if(!is_complete)Files.writeString(d,"");
         is_active = false;
     }
     public static BigInteger process(List<Byte> data)//byte-set converted into BigInteger 
