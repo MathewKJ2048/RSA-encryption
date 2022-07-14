@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -7,11 +8,13 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -24,6 +27,7 @@ public class GUI_RSA extends JFrame
     public static final Path TEST = Paths.get("program files/test.bin");
     public static final Path TEST_ENCRYPTED = Paths.get("program files/test-encrypted.bin");
     public static final Path TEST_DECRYPTED = Paths.get("program files/test-decrypted.bin");
+    public static final Path TEMP = Paths.get("program files/temp.bin");
     public static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     public static final String LAF_JSON_KEY = "Look and Feel";
     public static final String DEFAULT_DIRECTORY_SOURCE_PATH_JSON_KEY = "Default Source Directory Path";
@@ -80,8 +84,8 @@ public class GUI_RSA extends JFrame
         {
             UIManager.setLookAndFeel(get_look_and_feel_location(look_and_feel));
             System.out.println(ConsoleFont.getSize());
-            //TODO solve this issue (font)
-            //UIManager.put("TextArea.font", GUI_RISCV.ConsoleFont);
+            logTextArea.setFont(ConsoleFont);
+            LIDSATextArea.setFont(ConsoleFont);
         }
         catch (Exception ex)
         {
@@ -286,38 +290,60 @@ public class GUI_RSA extends JFrame
         class ShowHideActionListener implements ActionListener
         {
             final JTextField tf;
+            final JTextArea ta;
             final JButton b;
             final Color foreground;
             boolean is_hidden;
-            public ShowHideActionListener(JButton b,JTextField tf, boolean is_hidden_by_default)
+            public ShowHideActionListener(JButton b, JTextField tf, boolean is_hidden_by_default)
             {
                 this.b = b;
-                is_hidden=is_hidden_by_default;
-                this.tf=tf;
+                this.tf = tf;
+                this.ta = new JTextArea();
                 this.foreground=tf.getForeground();
-                if(is_hidden)
+                if(is_hidden_by_default)
                 {
-                    b.setText("Show");
-                    tf.setForeground(tf.getBackground());
-                    tf.setCaretColor(this.foreground);
-                    tf.repaint();
+                    hide();
                 }
+                is_hidden=is_hidden_by_default;
+            }
+            public ShowHideActionListener(JButton b, JTextArea ta, boolean is_hidden_by_default)
+            {
+                this.b = b;
+                this.tf = new JTextField();
+                this.ta = ta;
+                this.foreground=tf.getForeground();
+                if(is_hidden_by_default)
+                {
+                    hide();
+                }
+                is_hidden=is_hidden_by_default;
+            }
+            private void hide()
+            {
+                b.setText("Show");
+                tf.setForeground(tf.getBackground());
+                tf.setCaretColor(this.foreground);
+                ta.setForeground(ta.getBackground());
+                ta.setCaretColor(this.foreground);
+                is_hidden = true;
+            }
+            private void show()
+            {
+                b.setText("Hide");
+                tf.setForeground(foreground);
+                ta.setForeground(foreground);
+                is_hidden = false;
             }
             @Override
             public void actionPerformed(ActionEvent e) {
                 if(is_hidden)
                 {
-                    b.setText("Hide");
-                    tf.setForeground(foreground);
+                    show();
                 }
                 else
                 {
-                    b.setText("Show");
-                    tf.setForeground(tf.getBackground());
-                    tf.setCaretColor(this.foreground);
+                    hide();
                 }
-                tf.repaint();
-                is_hidden=!is_hidden;
             }
         }
         PshowButton.addActionListener(new ShowHideActionListener(PshowButton,PtextField,false));
@@ -380,9 +406,9 @@ public class GUI_RSA extends JFrame
                 PK = pk;
                 SK = sk;
                 N = n;
-                PKtextField.setText(PK.toString());
-                SKtextField.setText(SK.toString());
-                NtextField.setText(N.toString());
+                PK_main_textField.setText(PK.toString());
+                SK_main_textField.setText(SK.toString());
+                N_main_textField.setText(N.toString());
                 set_key(pk,sk,n,saveKeysBeforeReplacementRadioButton.isSelected());
                 JOptionPane.showMessageDialog(keyPanel,"key updated in key.json","Info",JOptionPane.INFORMATION_MESSAGE);
             }
@@ -628,6 +654,30 @@ public class GUI_RSA extends JFrame
                 doNotClickButton.setText(messages[ct]);
             }
         });
+        logShowHideButton.addActionListener(new ShowHideActionListener(logShowHideButton,logTextArea,false));
+        logDeleteButton.addActionListener(e -> {
+            logTextArea.setText("");
+        });
+        logSaveButton.addActionListener(e -> {
+            String filename = JOptionPane.showInputDialog(mainPanel,"Enter filename");
+            if(filename==null)return;
+            Path d = Paths.get(default_directory_destination.getAbsolutePath()+"/"+filename+" (encrypted at EPOCH "+System.currentTimeMillis()/1000+")"+".txt");
+            String plaintext = logTextArea.getText();
+            logTextArea.setText("");
+            try
+            {
+                Files.writeString(TEMP,plaintext);
+                Files.writeString(d,"");
+                File_encryptor fe = new File_encryptor(N,PK,(int)byte_limit,TEMP,d);
+                fe.encrypt();
+                Files.writeString(TEMP,"");
+            }
+            catch(Exception ex)
+            {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(mainPanel,ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+            }
+        });
     }
 
     private final JFrame main = this;
@@ -697,12 +747,11 @@ public class GUI_RSA extends JFrame
     private JComboBox memoryValueComboBox;
     private JButton clearHistoryButton;
     private JRadioButton saveKeysBeforeReplacementRadioButton;
-    private JButton hideButton;
-    private JButton deleteButton;
-    private JButton saveButton1;
-    private JTextArea textArea1;
+    private JButton logShowHideButton;
+    private JButton logDeleteButton;
+    private JButton logSaveButton;
+    private JTextArea logTextArea;
     private JTextArea creditsTextArea;
     private JButton doNotClickButton;
     private JTextPane licenceTextPane;
 }
-
