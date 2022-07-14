@@ -48,6 +48,7 @@ public class GUI_RSA extends JFrame
         fs.put("Large",20);
         fs.put("Huge",24);
         return fs;
+        // this is referenced in initialize()
     }
     private static HashMap<String,String> get_all_looks_and_feels()
     {
@@ -224,6 +225,11 @@ public class GUI_RSA extends JFrame
         else if(value == 500)memoryValueComboBox.setSelectedIndex(7);
         saveKeysBeforeReplacementRadioButton.setSelected(save_before_set);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int size = ConsoleFont.getSize();
+        if(size==12)consoleFontComboBox.setSelectedIndex(0);
+        else if(size==16)consoleFontComboBox.setSelectedIndex(1);
+        else if(size==20)consoleFontComboBox.setSelectedIndex(2);
+        else if(size==24)consoleFontComboBox.setSelectedIndex(3);
         try
         {
             load_key();
