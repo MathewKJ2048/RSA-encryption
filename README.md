@@ -2,7 +2,7 @@
 
 An application to encrypt messages using the RSA algorithm, written in java using the swing framework.
 
-![alt text](screenshots/key.png)
+![alt text](doc/screenshots/key.png)
 
 ## Installation
 
