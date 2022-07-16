@@ -84,7 +84,6 @@ public class GUI_RSA extends JFrame
         try
         {
             UIManager.setLookAndFeel(get_look_and_feel_location(look_and_feel));
-            System.out.println(ConsoleFont.getSize());
             logTextArea.setFont(ConsoleFont);
             LIDSATextArea.setFont(ConsoleFont);
         }
@@ -578,10 +577,8 @@ public class GUI_RSA extends JFrame
                 Files.writeString(TEST_DECRYPTED,"");
                 File_encryptor fee = new File_encryptor(n,pk,(int)byte_limit,TEST,TEST_ENCRYPTED);
                 fee.encrypt();
-                System.out.println("Encryption complete");
                 File_encryptor fed = new File_encryptor(n,sk,(int)byte_limit,TEST_ENCRYPTED,TEST_DECRYPTED);
                 fed.decrypt();
-                System.out.println("Decryption complete");
                 byte[] b0 = Files.readAllBytes(TEST);
                 byte[] b1 = Files.readAllBytes(TEST_DECRYPTED);
                 if(b0.length!=b1.length)throw new Exception("Error detected: length mismatch");
@@ -685,7 +682,6 @@ public class GUI_RSA extends JFrame
             }
         });
     }
-
     private final JFrame main = this;
     private final JFileChooser fc = new JFileChooser();
     private static File default_directory_source = new JFileChooser().getCurrentDirectory();
