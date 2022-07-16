@@ -2,6 +2,8 @@
 
 An application to encrypt messages using the RSA algorithm, written in java using the swing framework.
 
+![alt text](screenshots/key.png)
+
 ## Installation
 
 For the application to run, java version 17 or higher is required. The JRE should not be headless since the GUI uses swing.
